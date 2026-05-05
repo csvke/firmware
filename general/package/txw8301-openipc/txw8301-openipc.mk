@@ -49,5 +49,24 @@ define TXW8301_OPENIPC_INSTALL_TARGET_CMDS
 		$(TARGET_DIR)/etc/init.d/S35txw8301
 endef
 
+# Install WebUI extension page when majestic-webui is also selected.
+# The sed patch appends a TXW8301 HaLow entry to the Extensions dropdown in
+# header.cgi without requiring any source-level edits to the upstream
+# majestic-webui repository.  The grep guard prevents double-patching on
+# incremental builds.
+ifeq ($(BR2_PACKAGE_MAJESTIC_WEBUI),y)
+define TXW8301_OPENIPC_INSTALL_WEBUI
+	$(INSTALL) -D -m 755 $(TXW8301_OPENIPC_PKGDIR)/files/ext-txw8301.cgi \
+		$(TARGET_DIR)/var/www/cgi-bin/ext-txw8301.cgi
+	if [ -f $(TARGET_DIR)/var/www/cgi-bin/p/header.cgi ]; then \
+		grep -q ext-txw8301 $(TARGET_DIR)/var/www/cgi-bin/p/header.cgi || \
+		sed -i \
+			's|href="ext-proxy\.cgi">Proxy</a></li>|href="ext-proxy.cgi">Proxy</a></li>\n\t\t\t\t\t\t\t\t\t<li><hr class="dropdown-divider"><\/li>\n\t\t\t\t\t\t\t\t\t<li><a class="dropdown-item" href="ext-txw8301.cgi">TXW8301 HaLow<\/a><\/li>|' \
+			$(TARGET_DIR)/var/www/cgi-bin/p/header.cgi; \
+	fi
+endef
+TXW8301_OPENIPC_POST_INSTALL_TARGET_HOOKS += TXW8301_OPENIPC_INSTALL_WEBUI
+endif
+
 $(eval $(kernel-module))
 $(eval $(generic-package))
