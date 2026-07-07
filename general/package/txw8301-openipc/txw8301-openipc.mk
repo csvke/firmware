@@ -8,7 +8,7 @@ TXW8301_OPENIPC_SITE_METHOD = git
 TXW8301_OPENIPC_SITE = https://github.com/TXW8301/TXW8301-FMAC-linux-driver
 TXW8301_OPENIPC_VERSION = 867b5a55515d10c541786f3c5c5ab6002832f8b5
 
-TXW8301_OPENIPC_LICENSE = GPL-2.0, proprietary (hgicf firmware blob)
+TXW8301_OPENIPC_LICENSE = GPL-2.0
 TXW8301_OPENIPC_REDISTRIBUTE = NO
 
 # Module source lives under hgic_fmac/, not at the repo root.
@@ -28,7 +28,8 @@ TXW8301_OPENIPC_FW_BLOB = hgicf_usb.bin
 endif
 
 # GNUmakefile in tools/test_app/ places binaries under bin/$(notdir $(CC))/.
-TXW8301_OPENIPC_CC_NAME = $(notdir $(TARGET_CC))
+# Use lastword to strip a leading ccache prefix from TARGET_CC before notdir.
+TXW8301_OPENIPC_CC_NAME = $(notdir $(lastword $(TARGET_CC)))
 
 define TXW8301_OPENIPC_BUILD_CMDS
 	$(MAKE) -C $(@D)/tools/test_app CC="$(TARGET_CC)" CFLAGS="$(TARGET_CFLAGS)"
